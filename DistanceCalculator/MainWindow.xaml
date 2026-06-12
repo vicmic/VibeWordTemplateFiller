@@ -8,7 +8,7 @@
         xmlns:cv="clr-namespace:DistanceCalculator.Converters"
         mc:Ignorable="d"
         Title="Google Distance Calculator"
-        Height="820" Width="1100" MinHeight="700" MinWidth="900"
+        Height="900" Width="1200" MinHeight="750" MinWidth="980"
         WindowStartupLocation="CenterScreen"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
@@ -30,6 +30,7 @@
         <cv:StatusToIconConverter x:Key="StatusToIcon" />
         <cv:ApiKeyValidToColorConverter x:Key="ApiValidColor" />
         <cv:DoubleFormatConverter x:Key="DoubleFormat" />
+
         <Style x:Key="CardStyle" TargetType="materialDesign:Card">
             <Setter Property="Margin" Value="0,0,0,12" />
             <Setter Property="Padding" Value="20,16" />
@@ -40,6 +41,17 @@
             <Setter Property="FontWeight" Value="Medium" />
             <Setter Property="Foreground" Value="{DynamicResource PrimaryHueMidBrush}" />
             <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+        <Style x:Key="ColumnLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBodyLight}" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+        </Style>
+        <Style x:Key="GroupBox" TargetType="Border">
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="12,10" />
         </Style>
     </Window.Resources>
 
@@ -71,13 +83,13 @@
                     </StackPanel>
                 </StackPanel>
 
-                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Style="{StaticResource MaterialDesignIconButton}"
-                            Command="{Binding ClearCommand}"
-                            ToolTip="Ricomincia da capo">
-                        <materialDesign:PackIcon Kind="Refresh" />
-                    </Button>
-                </StackPanel>
+                <Button Grid.Column="2"
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        Command="{Binding ClearCommand}"
+                        ToolTip="Ricomincia da capo"
+                        VerticalAlignment="Center">
+                    <materialDesign:PackIcon Kind="Refresh" />
+                </Button>
             </Grid>
         </materialDesign:ColorZone>
 
@@ -85,7 +97,7 @@
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="20,16,20,8">
             <StackPanel>
 
-                <!-- === API KEY CARD === -->
+                <!-- === API KEY === -->
                 <materialDesign:Card Style="{StaticResource CardStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -107,32 +119,24 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-
                             <TextBox Grid.Column="0"
                                      materialDesign:HintAssist.Hint="Chiave API Google Maps Distance Matrix"
                                      materialDesign:HintAssist.IsFloating="True"
                                      Style="{StaticResource MaterialDesignOutlinedTextBox}"
                                      Text="{Binding ApiKey, UpdateSourceTrigger=PropertyChanged}"
                                      Margin="0,0,12,0"
-                                     FontFamily="Consolas"
-                                     FontSize="12" />
-
+                                     FontFamily="Consolas" FontSize="12" />
                             <Button Grid.Column="1"
                                     Style="{StaticResource MaterialDesignOutlinedButton}"
                                     Command="{Binding ValidateApiKeyCommand}"
-                                    IsEnabled="{Binding IsValidatingKey, Converter={StaticResource BoolToVis}, ConverterParameter=invert}"
                                     Height="48" Padding="16,0"
                                     VerticalAlignment="Bottom">
                                 <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="CheckDecagram"
-                                                            Width="16" Height="16"
-                                                            VerticalAlignment="Center"
-                                                            Margin="0,0,6,0"
+                                    <materialDesign:PackIcon Kind="CheckDecagram" Width="16" Height="16"
+                                                            VerticalAlignment="Center" Margin="0,0,6,0"
                                                             Visibility="{Binding IsValidatingKey, Converter={StaticResource BoolToVis}, ConverterParameter=invert}" />
-                                    <materialDesign:PackIcon Kind="Loading"
-                                                            Width="16" Height="16"
-                                                            VerticalAlignment="Center"
-                                                            Margin="0,0,6,0"
+                                    <materialDesign:PackIcon Kind="Loading" Width="16" Height="16"
+                                                            VerticalAlignment="Center" Margin="0,0,6,0"
                                                             Visibility="{Binding IsValidatingKey, Converter={StaticResource BoolToVis}}" />
                                     <TextBlock Text="Verifica" VerticalAlignment="Center" />
                                 </StackPanel>
@@ -141,16 +145,14 @@
 
                         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,8,0,0"
                                     Visibility="{Binding ApiKeyStatus, Converter={StaticResource NullToVis}}">
-                            <materialDesign:PackIcon Kind="CheckCircle"
-                                Width="16" Height="16"
-                                Foreground="{Binding IsApiKeyValid, Converter={StaticResource ApiValidColor}}"
-                                VerticalAlignment="Center" Margin="0,0,6,0"
-                                Visibility="{Binding IsApiKeyValid, Converter={StaticResource BoolToVis}}" />
-                            <materialDesign:PackIcon Kind="AlertCircle"
-                                Width="16" Height="16"
-                                Foreground="{Binding IsApiKeyValid, Converter={StaticResource ApiValidColor}}"
-                                VerticalAlignment="Center" Margin="0,0,6,0"
-                                Visibility="{Binding IsApiKeyValid, Converter={StaticResource BoolToVis}, ConverterParameter=invert}" />
+                            <materialDesign:PackIcon Kind="CheckCircle" Width="16" Height="16"
+                                                    Foreground="{Binding IsApiKeyValid, Converter={StaticResource ApiValidColor}}"
+                                                    VerticalAlignment="Center" Margin="0,0,6,0"
+                                                    Visibility="{Binding IsApiKeyValid, Converter={StaticResource BoolToVis}}" />
+                            <materialDesign:PackIcon Kind="AlertCircle" Width="16" Height="16"
+                                                    Foreground="{Binding IsApiKeyValid, Converter={StaticResource ApiValidColor}}"
+                                                    VerticalAlignment="Center" Margin="0,0,6,0"
+                                                    Visibility="{Binding IsApiKeyValid, Converter={StaticResource BoolToVis}, ConverterParameter=invert}" />
                             <TextBlock Text="{Binding ApiKeyStatus}"
                                        Foreground="{Binding IsApiKeyValid, Converter={StaticResource ApiValidColor}}"
                                        FontSize="12" VerticalAlignment="Center" />
@@ -158,7 +160,7 @@
                     </Grid>
                 </materialDesign:Card>
 
-                <!-- === FILE SELECTION CARD === -->
+                <!-- === FILE SELECTION === -->
                 <materialDesign:Card Style="{StaticResource CardStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -175,30 +177,17 @@
                                        Margin="0" VerticalAlignment="Center" />
                         </StackPanel>
 
-                        <!-- Drop Zone -->
-                        <Border Grid.Row="1"
+                        <Border Grid.Row="1" Height="80"
                                 Name="DropZone"
-                                Height="80"
                                 BorderBrush="{DynamicResource PrimaryHueLightBrush}"
-                                BorderThickness="2"
-                                CornerRadius="8"
-                                Margin="0,0,0,12"
-                                Cursor="Hand"
-                                MouseLeftButtonDown="DropZone_Click">
+                                BorderThickness="2" CornerRadius="8" Margin="0,0,0,12"
+                                Cursor="Hand" MouseLeftButtonDown="DropZone_Click">
                             <Border.Style>
                                 <Style TargetType="Border">
-                                    <Setter Property="Background">
-                                        <Setter.Value>
-                                            <SolidColorBrush Color="#F0F4FF" />
-                                        </Setter.Value>
-                                    </Setter>
+                                    <Setter Property="Background"><Setter.Value><SolidColorBrush Color="#F0F4FF"/></Setter.Value></Setter>
                                     <Style.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background">
-                                                <Setter.Value>
-                                                    <SolidColorBrush Color="#E3EEFF" />
-                                                </Setter.Value>
-                                            </Setter>
+                                            <Setter Property="Background"><Setter.Value><SolidColorBrush Color="#E3EEFF"/></Setter.Value></Setter>
                                         </Trigger>
                                     </Style.Triggers>
                                 </Style>
@@ -217,23 +206,19 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- File info row -->
                         <Grid Grid.Row="2">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-
                             <materialDesign:PackIcon Grid.Column="0" Kind="FileCheckOutline"
-                                                    Width="20" Height="20"
-                                                    VerticalAlignment="Center"
+                                                    Width="20" Height="20" VerticalAlignment="Center"
                                                     Foreground="{DynamicResource PrimaryHueMidBrush}"
                                                     Margin="0,0,8,0"
                                                     Visibility="{Binding IsFileLoaded, Converter={StaticResource BoolToVis}}" />
                             <TextBlock Grid.Column="1"
-                                       Text="{Binding FileName}"
-                                       VerticalAlignment="Center"
+                                       Text="{Binding FileName}" VerticalAlignment="Center"
                                        FontWeight="Medium"
                                        Foreground="{DynamicResource PrimaryHueMidBrush}"
                                        Visibility="{Binding IsFileLoaded, Converter={StaticResource BoolToVis}}" />
@@ -251,17 +236,11 @@
                     </Grid>
                 </materialDesign:Card>
 
-                <!-- === COLUMN CONFIG CARD (shown when file loaded) === -->
+                <!-- === COLUMN CONFIG (visible when file loaded) === -->
                 <materialDesign:Card Style="{StaticResource CardStyle}"
                                      Visibility="{Binding IsFileLoaded, Converter={StaticResource BoolToVis}}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,14">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
                             <materialDesign:PackIcon Kind="TableCog" Width="18" Height="18"
                                                     Foreground="{DynamicResource PrimaryHueMidBrush}"
                                                     VerticalAlignment="Center" Margin="0,0,8,0" />
@@ -269,88 +248,190 @@
                                        Margin="0" VerticalAlignment="Center" />
                         </StackPanel>
 
-                        <Grid Grid.Row="1">
+                        <!-- Row 1: Date + Generic Desc -->
+                        <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="16" />
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="12" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="12" />
-                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Indirizzo Partenza *" FontSize="11"
-                                           Foreground="{DynamicResource MaterialDesignBodyLight}"
-                                           Margin="0,0,0,4" />
-                                <ComboBox materialDesign:HintAssist.Hint="Colonna partenza"
-                                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                                          ItemsSource="{Binding ColumnOptions}"
+                                <TextBlock Text="Data tragitto" Style="{StaticResource ColumnLabel}" />
+                                <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                          ItemsSource="{Binding OptionalColumnOptions}"
                                           DisplayMemberPath="DisplayName"
                                           SelectedValuePath="Index"
-                                          SelectedValue="{Binding DepartureColumnIndex}" />
+                                          SelectedValue="{Binding DateColumnIndex}" />
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Indirizzo Arrivo *" FontSize="11"
-                                           Foreground="{DynamicResource MaterialDesignBodyLight}"
-                                           Margin="0,0,0,4" />
-                                <ComboBox materialDesign:HintAssist.Hint="Colonna arrivo"
-                                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                                          ItemsSource="{Binding ColumnOptions}"
-                                          DisplayMemberPath="DisplayName"
-                                          SelectedValuePath="Index"
-                                          SelectedValue="{Binding ArrivalColumnIndex}" />
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="4">
-                                <TextBlock Text="Descrizione Partenza" FontSize="11"
-                                           Foreground="{DynamicResource MaterialDesignBodyLight}"
-                                           Margin="0,0,0,4" />
-                                <ComboBox materialDesign:HintAssist.Hint="Opzionale"
-                                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                <TextBlock Text="Descrizione generica viaggio" Style="{StaticResource ColumnLabel}" />
+                                <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
                                           ItemsSource="{Binding OptionalColumnOptions}"
                                           DisplayMemberPath="DisplayName"
                                           SelectedValuePath="Index"
-                                          SelectedValue="{Binding DepDescColumnIndex}" />
+                                          SelectedValue="{Binding GenericDescColumnIndex}" />
                             </StackPanel>
 
-                            <StackPanel Grid.Column="6">
-                                <TextBlock Text="Descrizione Arrivo" FontSize="11"
-                                           Foreground="{DynamicResource MaterialDesignBodyLight}"
-                                           Margin="0,0,0,4" />
-                                <ComboBox materialDesign:HintAssist.Hint="Opzionale"
-                                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                                          ItemsSource="{Binding OptionalColumnOptions}"
-                                          DisplayMemberPath="DisplayName"
-                                          SelectedValuePath="Index"
-                                          SelectedValue="{Binding ArrDescColumnIndex}" />
+                            <StackPanel Grid.Column="4" VerticalAlignment="Bottom">
+                                <CheckBox Content="Prima riga = intestazioni"
+                                          IsChecked="{Binding HasHeaderRow}"
+                                          Style="{StaticResource MaterialDesignCheckBox}" />
                             </StackPanel>
                         </Grid>
 
-                        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,12,0,0">
-                            <CheckBox Content="Prima riga = intestazioni"
-                                      IsChecked="{Binding HasHeaderRow}"
-                                      Style="{StaticResource MaterialDesignCheckBox}"
-                                      Margin="0,0,24,0" />
+                        <!-- Divider -->
+                        <Separator Margin="0,0,0,12" />
+
+                        <!-- Row 2: Departure -->
+                        <Border Style="{StaticResource GroupBox}" Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="200" />
+                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Colonna Partenza *" Style="{StaticResource ColumnLabel}" />
+                                    <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                              ItemsSource="{Binding ColumnOptions}"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectedValuePath="Index"
+                                              SelectedValue="{Binding DepartureColumnIndex}" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2" VerticalAlignment="Bottom" Margin="0,0,0,4">
+                                    <CheckBox Content="Desc.+indirizzo stessa cella"
+                                              IsChecked="{Binding DepartureCombinedCell}"
+                                              Style="{StaticResource MaterialDesignCheckBox}" />
+                                </StackPanel>
+
+                                <!-- Separator choice (visible when combined) -->
+                                <StackPanel Grid.Column="4"
+                                            Visibility="{Binding DepartureCombinedCell, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Text="Separatore" Style="{StaticResource ColumnLabel}" />
+                                    <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                              ItemsSource="{Binding SeparatorOptions}"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectedValuePath="Value"
+                                              SelectedValue="{Binding SelectedSeparator}" />
+                                </StackPanel>
+
+                                <!-- Separate desc column (visible when NOT combined) -->
+                                <StackPanel Grid.Column="4"
+                                            Visibility="{Binding DepartureCombinedCell, Converter={StaticResource BoolToVis}, ConverterParameter=invert}">
+                                    <TextBlock Text="Colonna Descrizione Partenza" Style="{StaticResource ColumnLabel}" />
+                                    <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                              ItemsSource="{Binding OptionalColumnOptions}"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectedValuePath="Index"
+                                              SelectedValue="{Binding DepDescColumnIndex}" />
+                                </StackPanel>
+
+                                <!-- Preview chip -->
+                                <StackPanel Grid.Column="6" VerticalAlignment="Center" Margin="0,12,0,0">
+                                    <materialDesign:Chip Content="Partenza"
+                                                         Icon="{materialDesign:PackIcon Kind=MapMarker}"
+                                                         Background="{DynamicResource PrimaryHueLightBrush}"
+                                                         Foreground="{DynamicResource PrimaryHueLightForegroundBrush}"
+                                                         IsEnabled="False" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Row 3: Arrival -->
+                        <Border Style="{StaticResource GroupBox}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="200" />
+                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Colonna Arrivo *" Style="{StaticResource ColumnLabel}" />
+                                    <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                              ItemsSource="{Binding ColumnOptions}"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectedValuePath="Index"
+                                              SelectedValue="{Binding ArrivalColumnIndex}" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2" VerticalAlignment="Bottom" Margin="0,0,0,4">
+                                    <CheckBox Content="Desc.+indirizzo stessa cella"
+                                              IsChecked="{Binding ArrivalCombinedCell}"
+                                              Style="{StaticResource MaterialDesignCheckBox}" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="4"
+                                            Visibility="{Binding ArrivalCombinedCell, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Text="Separatore" Style="{StaticResource ColumnLabel}" />
+                                    <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                              ItemsSource="{Binding SeparatorOptions}"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectedValuePath="Value"
+                                              SelectedValue="{Binding SelectedSeparator}" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="4"
+                                            Visibility="{Binding ArrivalCombinedCell, Converter={StaticResource BoolToVis}, ConverterParameter=invert}">
+                                    <TextBlock Text="Colonna Descrizione Arrivo" Style="{StaticResource ColumnLabel}" />
+                                    <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                              ItemsSource="{Binding OptionalColumnOptions}"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectedValuePath="Index"
+                                              SelectedValue="{Binding ArrDescColumnIndex}" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="6" VerticalAlignment="Center" Margin="0,12,0,0">
+                                    <materialDesign:Chip Content="Arrivo"
+                                                         Icon="{materialDesign:PackIcon Kind=MapMarkerCheck}"
+                                                         Background="#E8F5E9"
+                                                         Foreground="#2E7D32"
+                                                         IsEnabled="False" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Info hint about combined cell -->
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0"
+                                    Visibility="{Binding DepartureCombinedCell, Converter={StaticResource BoolToVis}}">
                             <materialDesign:PackIcon Kind="InformationOutline" Width="14" Height="14"
-                                                    VerticalAlignment="Center" Margin="0,0,6,0"
-                                                    Opacity="0.6" />
-                            <TextBlock Text="{Binding ProcessedInfo}"
-                                       VerticalAlignment="Center"
-                                       FontSize="12" Opacity="0.7" />
+                                                    VerticalAlignment="Center" Margin="0,0,6,0" Opacity="0.6" />
+                            <TextBlock FontSize="11" Opacity="0.7" TextWrapping="Wrap">
+                                <Run Text="Modalità cella combinata attiva: l'app estrae la descrizione separando con il carattere scelto (o automaticamente con a capo, " />
+                                <Run Text="«" /><Run Text=" - " /><Run Text="»" />
+                                <Run Text=" o parole chiave stradali: Via, Viale, Piazza…)" />
+                            </TextBlock>
                         </StackPanel>
-                    </Grid>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                            <materialDesign:PackIcon Kind="InformationOutline" Width="14" Height="14"
+                                                    VerticalAlignment="Center" Margin="0,0,6,0" Opacity="0.6" />
+                            <TextBlock Text="{Binding ProcessedInfo}" FontSize="12" Opacity="0.7" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </StackPanel>
                 </materialDesign:Card>
 
-                <!-- === DATA PREVIEW CARD (shown when file loaded) === -->
+                <!-- === DATA GRID PREVIEW (visible when file loaded) === -->
                 <materialDesign:Card Style="{StaticResource CardStyle}"
                                      Visibility="{Binding IsFileLoaded, Converter={StaticResource BoolToVis}}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
-                            <RowDefinition Height="220" />
+                            <RowDefinition Height="240" />
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
@@ -367,35 +448,68 @@
                                   IsReadOnly="True"
                                   CanUserAddRows="False"
                                   CanUserDeleteRows="False"
-                                  materialDesign:DataGridAssist.CellPadding="10,6"
-                                  materialDesign:DataGridAssist.ColumnHeaderPadding="10,8"
+                                  materialDesign:DataGridAssist.CellPadding="8,5"
+                                  materialDesign:DataGridAssist.ColumnHeaderPadding="8,7"
                                   Style="{StaticResource MaterialDesignDataGrid}"
                                   HeadersVisibility="Column"
                                   SelectionMode="Single"
                                   HorizontalScrollBarVisibility="Auto"
                                   VerticalScrollBarVisibility="Auto">
                             <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="Stato" Width="48" CanUserResize="False">
+
+                                <!-- Status icon -->
+                                <DataGridTemplateColumn Header="" Width="40" CanUserResize="False">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <materialDesign:PackIcon
                                                 Kind="{Binding Status, Converter={StaticResource StatusToIcon}}"
-                                                Width="18" Height="18"
+                                                Width="16" Height="16"
                                                 Foreground="{Binding Status, Converter={StaticResource StatusToColor}}"
                                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="Riga" Binding="{Binding RowNumber}" Width="48" />
-                                <DataGridTextColumn Header="Indirizzo Partenza"
-                                                    Binding="{Binding DepartureAddress}" Width="*" />
-                                <DataGridTextColumn Header="Descrizione Partenza"
-                                                    Binding="{Binding DepartureDescription}" Width="0.6*" />
-                                <DataGridTextColumn Header="Indirizzo Arrivo"
-                                                    Binding="{Binding ArrivalAddress}" Width="*" />
-                                <DataGridTextColumn Header="Descrizione Arrivo"
-                                                    Binding="{Binding ArrivalDescription}" Width="0.6*" />
-                                <DataGridTemplateColumn Header="Distanza" Width="110" CanUserResize="False">
+
+                                <DataGridTextColumn Header="#" Binding="{Binding RowNumber}" Width="44" />
+                                <DataGridTextColumn Header="Data" Binding="{Binding Date}" Width="90" />
+                                <DataGridTextColumn Header="Descrizione" Binding="{Binding GenericDescription}" Width="120" />
+
+                                <!-- Departure -->
+                                <DataGridTemplateColumn Header="Partenza" Width="200">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding DepartureDescription}"
+                                                           FontSize="10" Opacity="0.6"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           Visibility="{Binding DepartureDescription, Converter={StaticResource NullToVis}}" />
+                                                <TextBlock Text="{Binding DepartureAddress}"
+                                                           FontWeight="Medium"
+                                                           TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <!-- Arrival -->
+                                <DataGridTemplateColumn Header="Arrivo" Width="200">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding ArrivalDescription}"
+                                                           FontSize="10" Opacity="0.6"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           Visibility="{Binding ArrivalDescription, Converter={StaticResource NullToVis}}" />
+                                                <TextBlock Text="{Binding ArrivalAddress}"
+                                                           FontWeight="Medium"
+                                                           TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <!-- Distance + error -->
+                                <DataGridTemplateColumn Header="Distanza" Width="120" CanUserResize="False">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <StackPanel HorizontalAlignment="Right">
@@ -418,7 +532,7 @@
                     </Grid>
                 </materialDesign:Card>
 
-                <!-- === RESULTS CARD (shown when has results) === -->
+                <!-- === RESULTS CARD (visible when has results) === -->
                 <materialDesign:Card Style="{StaticResource CardStyle}"
                                      Visibility="{Binding HasResults, Converter={StaticResource BoolToVis}}">
                     <Grid>
@@ -433,8 +547,7 @@
                                                         Foreground="{DynamicResource PrimaryHueMidBrush}"
                                                         VerticalAlignment="Center" Margin="0,0,12,0" />
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Totale Distanza Percorsa"
-                                               FontSize="12" Opacity="0.7" />
+                                    <TextBlock Text="Totale Distanza Percorsa" FontSize="12" Opacity="0.7" />
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding TotalDistanceKm, Converter={StaticResource DoubleFormat}}"
                                                    FontSize="32" FontWeight="Bold"
@@ -446,27 +559,23 @@
                                     </StackPanel>
                                 </StackPanel>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0"
+                            <StackPanel Orientation="Horizontal" Margin="0,6,0,0"
                                         Visibility="{Binding SaveSuccess, Converter={StaticResource BoolToVis}}">
                                 <materialDesign:PackIcon Kind="CheckCircle" Width="16" Height="16"
-                                                        Foreground="#43A047"
-                                                        VerticalAlignment="Center" Margin="0,0,6,0" />
+                                                        Foreground="#43A047" VerticalAlignment="Center" Margin="0,0,6,0" />
                                 <TextBlock Text="Risultati salvati nel file Excel"
-                                           Foreground="#43A047" FontSize="12"
-                                           VerticalAlignment="Center" />
+                                           Foreground="#43A047" FontSize="12" VerticalAlignment="Center" />
                             </StackPanel>
                         </StackPanel>
 
                         <Button Grid.Column="1"
                                 Style="{StaticResource MaterialDesignRaisedButton}"
                                 Command="{Binding SaveResultsCommand}"
-                                Height="52" Padding="20,0"
-                                VerticalAlignment="Center">
+                                Height="52" Padding="20,0" VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="ContentSave" Width="18" Height="18"
                                                         VerticalAlignment="Center" Margin="0,0,8,0" />
-                                <TextBlock Text="Salva Risultati" VerticalAlignment="Center"
-                                           FontSize="14" />
+                                <TextBlock Text="Salva Risultati" VerticalAlignment="Center" FontSize="14" />
                             </StackPanel>
                         </Button>
                     </Grid>
@@ -478,8 +587,7 @@
         <!-- ===== BOTTOM ACTION BAR ===== -->
         <materialDesign:Card Grid.Row="2"
                              materialDesign:ElevationAssist.Elevation="Dp4"
-                             Padding="20,12"
-                             Margin="0">
+                             Padding="20,12" Margin="0">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -488,38 +596,27 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Status + Progress -->
                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                        <materialDesign:PackIcon Kind="Information"
-                                                Width="14" Height="14"
-                                                VerticalAlignment="Center"
-                                                Margin="0,0,6,0"
-                                                Opacity="0.6"
+                        <materialDesign:PackIcon Kind="Information" Width="14" Height="14"
+                                                VerticalAlignment="Center" Margin="0,0,6,0" Opacity="0.6"
                                                 Visibility="{Binding IsProcessing, Converter={StaticResource BoolToVis}, ConverterParameter=invert}" />
-                        <materialDesign:PackIcon Kind="ProgressClock"
-                                                Width="14" Height="14"
-                                                VerticalAlignment="Center"
-                                                Margin="0,0,6,0"
+                        <materialDesign:PackIcon Kind="ProgressClock" Width="14" Height="14"
+                                                VerticalAlignment="Center" Margin="0,0,6,0"
                                                 Foreground="{DynamicResource PrimaryHueMidBrush}"
                                                 Visibility="{Binding IsProcessing, Converter={StaticResource BoolToVis}}" />
-                        <TextBlock Text="{Binding StatusMessage}"
-                                   VerticalAlignment="Center"
-                                   FontSize="12" />
+                        <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center" FontSize="12" />
                     </StackPanel>
-                    <ProgressBar Value="{Binding Progress}"
-                                 Height="4"
+                    <ProgressBar Value="{Binding Progress}" Height="4"
                                  Visibility="{Binding IsProcessing, Converter={StaticResource BoolToVis}}"
                                  Style="{StaticResource MaterialDesignLinearProgressBar}" />
                 </StackPanel>
 
-                <!-- Cancel button -->
                 <Button Grid.Column="1"
                         Style="{StaticResource MaterialDesignOutlinedButton}"
                         Command="{Binding CancelCommand}"
                         Visibility="{Binding IsProcessing, Converter={StaticResource BoolToVis}}"
-                        Foreground="#E53935"
-                        BorderBrush="#E53935"
+                        Foreground="#E53935" BorderBrush="#E53935"
                         Height="42" Padding="16,0">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Stop" Width="16" Height="16"
@@ -528,13 +625,11 @@
                     </StackPanel>
                 </Button>
 
-                <!-- Calculate button -->
                 <Button Grid.Column="3"
                         Style="{StaticResource MaterialDesignRaisedButton}"
                         Command="{Binding CalculateCommand}"
                         IsEnabled="{Binding CanCalculate}"
-                        Height="42" Padding="24,0"
-                        FontSize="14">
+                        Height="42" Padding="24,0" FontSize="14">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="RouteVariant" Width="18" Height="18"
                                                 VerticalAlignment="Center" Margin="0,0,8,0" />

@@ -19,6 +19,7 @@ public partial class MainViewModel : ObservableObject
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "DistanceCalculator", "settings.json");
 
+    // ── API key ──────────────────────────────────────────────────────────
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanCalculate))]
     private string _apiKey = "";
@@ -32,6 +33,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool _isValidatingKey;
 
+    // ── File ─────────────────────────────────────────────────────────────
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsFileLoaded))]
     [NotifyPropertyChangedFor(nameof(CanCalculate))]
@@ -40,6 +42,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _fileName = "Nessun file selezionato";
 
+    // ── Processing ───────────────────────────────────────────────────────
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanCalculate))]
     private bool _isProcessing;
@@ -62,13 +65,20 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool _saveSuccess;
 
+    // ── Column mapping ───────────────────────────────────────────────────
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanCalculate))]
-    private int _departureColumnIndex;
+    private int _dateColumnIndex = 0;
+
+    [ObservableProperty]
+    private int _genericDescColumnIndex = 1;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanCalculate))]
-    private int _arrivalColumnIndex = 1;
+    private int _departureColumnIndex = 2;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanCalculate))]
+    private int _arrivalColumnIndex = 3;
 
     [ObservableProperty]
     private int _depDescColumnIndex = -1;
@@ -77,11 +87,30 @@ public partial class MainViewModel : ObservableObject
     private int _arrDescColumnIndex = -1;
 
     [ObservableProperty]
+    private bool _departureCombinedCell;
+
+    [ObservableProperty]
+    private bool _arrivalCombinedCell;
+
+    [ObservableProperty]
+    private string _selectedSeparator = "auto";
+
+    [ObservableProperty]
     private bool _hasHeaderRow = true;
 
+    // ── Collections ──────────────────────────────────────────────────────
     public ObservableCollection<AddressRow> Rows { get; } = [];
     public ObservableCollection<ColumnOption> ColumnOptions { get; } = [];
     public ObservableCollection<ColumnOption> OptionalColumnOptions { get; } = [];
+
+    public List<SeparatorOption> SeparatorOptions { get; } =
+    [
+        new() { Value = "auto",  DisplayName = "Auto (↵ o  —  o indirizzo)" },
+        new() { Value = "\\n",   DisplayName = "A capo (↵ Alt+Invio)" },
+        new() { Value = " - ",   DisplayName = "Trattino spazio ( - )" },
+        new() { Value = ", ",    DisplayName = "Virgola spazio (, )" },
+        new() { Value = " | ",   DisplayName = "Barra verticale ( | )" },
+    ];
 
     public bool IsFileLoaded => FilePath != null;
     public bool CanCalculate => IsFileLoaded && !string.IsNullOrWhiteSpace(ApiKey) && !IsProcessing;
@@ -120,14 +149,17 @@ public partial class MainViewModel : ObservableObject
         HasHeaderRow = result.HasHeaders;
 
         BuildColumnOptions(result);
-        var (dep, arr, depDesc, arrDesc) = _excelService.AutoDetectColumns(result.Headers);
+
+        var (datCol, genCol, dep, arr, depDesc, arrDesc) = _excelService.AutoDetectColumns(result.Headers);
+        DateColumnIndex = datCol;
+        GenericDescColumnIndex = genCol;
         DepartureColumnIndex = dep;
         ArrivalColumnIndex = arr;
         DepDescColumnIndex = depDesc;
         ArrDescColumnIndex = arrDesc;
 
         RefreshRows();
-        StatusMessage = $"File caricato: {result.RawData.Count} righe trovate";
+        StatusMessage = $"File caricato: {result.RawData.Count - (result.HasHeaders ? 1 : 0)} righe di dati";
         HasResults = false;
         SaveSuccess = false;
     }
@@ -136,27 +168,30 @@ public partial class MainViewModel : ObservableObject
     {
         ColumnOptions.Clear();
         OptionalColumnOptions.Clear();
-
         OptionalColumnOptions.Add(new ColumnOption { Index = -1, DisplayName = "-- Nessuno --" });
 
         for (int i = 0; i < result.ColumnCount; i++)
         {
-            string colLetter = GetColumnLetter(i);
+            string letter = GetColumnLetter(i);
             string header = i < result.Headers.Count ? result.Headers[i] : "";
             string label = string.IsNullOrWhiteSpace(header)
-                ? $"Colonna {colLetter}"
-                : $"{colLetter}: {header}";
+                ? $"Colonna {letter}"
+                : $"{letter}: {header}";
 
-            var opt = new ColumnOption { Index = i, DisplayName = label };
-            ColumnOptions.Add(opt);
+            ColumnOptions.Add(new ColumnOption { Index = i, DisplayName = label });
             OptionalColumnOptions.Add(new ColumnOption { Index = i, DisplayName = label });
         }
     }
 
+    partial void OnDateColumnIndexChanged(int value) => RefreshRows();
+    partial void OnGenericDescColumnIndexChanged(int value) => RefreshRows();
     partial void OnDepartureColumnIndexChanged(int value) => RefreshRows();
     partial void OnArrivalColumnIndexChanged(int value) => RefreshRows();
     partial void OnDepDescColumnIndexChanged(int value) => RefreshRows();
     partial void OnArrDescColumnIndexChanged(int value) => RefreshRows();
+    partial void OnDepartureCombinedCellChanged(bool value) => RefreshRows();
+    partial void OnArrivalCombinedCellChanged(bool value) => RefreshRows();
+    partial void OnSelectedSeparatorChanged(string value) => RefreshRows();
     partial void OnHasHeaderRowChanged(bool value) => RefreshRows();
 
     private void RefreshRows()
@@ -182,7 +217,6 @@ public partial class MainViewModel : ObservableObject
         Progress = 0;
         TotalDistanceKm = 0;
 
-        var config = BuildConfig();
         var processable = Rows.Where(r => r.Status != ProcessingStatus.Skipped).ToList();
         int total = processable.Count;
         int done = 0;
@@ -200,7 +234,7 @@ public partial class MainViewModel : ObservableObject
             }
 
             row.Status = ProcessingStatus.Processing;
-            StatusMessage = $"Elaborazione riga {row.RowNumber}: {row.DepartureAddress} → {row.ArrivalAddress}";
+            StatusMessage = $"Riga {row.RowNumber}: {row.DepartureAddress} → {row.ArrivalAddress}";
 
             try
             {
@@ -240,7 +274,7 @@ public partial class MainViewModel : ObservableObject
         IsProcessing = false;
         HasResults = true;
         StatusMessage = _cts.IsCancellationRequested
-            ? $"Elaborazione annullata — {done}/{total} righe completate, {totalKm:F2} km totali"
+            ? $"Annullato — {done}/{total} completate, {totalKm:F2} km totali"
             : $"Completato! Totale: {totalKm:F2} km";
     }
 
@@ -268,22 +302,22 @@ public partial class MainViewModel : ObservableObject
         {
             var dlg = new SaveFileDialog
             {
-                Title = "Salva come nuovo file",
+                Title = "File occupato — salva copia",
                 Filter = "File Excel (*.xlsx)|*.xlsx",
                 FileName = Path.GetFileNameWithoutExtension(FilePath) + "_distanze.xlsx"
             };
             if (dlg.ShowDialog() == true)
             {
                 File.Copy(FilePath, dlg.FileName, true);
-                var newError = _excelService.SaveResults(dlg.FileName, [.. Rows], config, TotalDistanceKm);
-                if (newError is null)
+                var newErr = _excelService.SaveResults(dlg.FileName, [.. Rows], config, TotalDistanceKm);
+                if (newErr is null)
                 {
                     SaveSuccess = true;
                     StatusMessage = $"Salvato in: {Path.GetFileName(dlg.FileName)}";
                 }
                 else
                 {
-                    StatusMessage = $"Errore salvataggio: {newError}";
+                    StatusMessage = $"Errore salvataggio: {newErr}";
                 }
             }
         }
@@ -325,10 +359,15 @@ public partial class MainViewModel : ObservableObject
 
     private ColumnConfig BuildConfig() => new()
     {
+        DateColumn = DateColumnIndex,
+        GenericDescriptionColumn = GenericDescColumnIndex,
         DepartureAddressColumn = DepartureColumnIndex,
         ArrivalAddressColumn = ArrivalColumnIndex,
         DepartureDescriptionColumn = DepDescColumnIndex,
         ArrivalDescriptionColumn = ArrDescColumnIndex,
+        DepartureCombinedCell = DepartureCombinedCell,
+        ArrivalCombinedCell = ArrivalCombinedCell,
+        CellSeparator = SelectedSeparator,
         HasHeaderRow = HasHeaderRow
     };
 
